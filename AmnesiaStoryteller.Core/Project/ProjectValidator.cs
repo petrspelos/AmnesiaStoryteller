@@ -15,8 +15,15 @@ namespace AmnesiaStoryteller.Core.Project
 
         public bool DirectoryContainsCustomStory(string path)
         {
-            var files = _fileSystem.GetFiles(path).Select(Path.GetFileName).ToArray();
-            return files.Any(FileIsBaseLang) && files.Any(f => f == "custom_story_settings.cfg");
+            try
+            {
+                var files = _fileSystem.GetFiles(path).Select(Path.GetFileName).ToArray();
+                return files.Any(FileIsBaseLang) && files.Any(f => f == "custom_story_settings.cfg");
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return false;
+            }
         }
 
         private static bool FileIsBaseLang(string fileName) 

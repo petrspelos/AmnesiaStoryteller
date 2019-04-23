@@ -1,4 +1,5 @@
-﻿using AmnesiaStoryteller.Abstractions;
+﻿using System.IO;
+using AmnesiaStoryteller.Abstractions;
 using AmnesiaStoryteller.Core.Project;
 using Moq;
 using Xunit;
@@ -57,6 +58,30 @@ namespace AmnesiaStoryteller.Core.Tests.Project
                 .Setup(fs => fs.GetFiles(path))
                 .Returns(new[] { "custom_story_settings.cfg", "thumbnail.png" });
 
+            Assert.False(_validator.DirectoryContainsCustomStory(path));
+        }
+
+        [Fact]
+        public void EmptyDirectoryFails()
+        {
+            const string path = @"C:\TestDirectory\EmptyDir";
+
+            _fileSystemMock
+                .Setup(fs => fs.GetFiles(path))
+                .Returns(new string[] { });
+
+            Assert.False(_validator.DirectoryContainsCustomStory(path));
+        }
+
+        [Fact]
+        public void DirectoryNotFoundFails()
+        {
+            const string path = @"C:\TestDirectory\FakeDir";
+
+            _fileSystemMock
+                .Setup(fs => fs.GetFiles(path))
+                .Returns(() => throw new DirectoryNotFoundException());
+            
             Assert.False(_validator.DirectoryContainsCustomStory(path));
         }
     }
