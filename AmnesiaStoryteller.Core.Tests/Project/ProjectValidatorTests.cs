@@ -1,21 +1,63 @@
-﻿using AmnesiaStoryteller.Core.Project;
+﻿using AmnesiaStoryteller.Abstractions;
+using AmnesiaStoryteller.Core.Project;
+using Moq;
 using Xunit;
 
 namespace AmnesiaStoryteller.Core.Tests.Project
 {
     public class ProjectValidatorTests
     {
-        private ProjectValidator _validator;
+        private readonly Mock<IFileSystem> _fileSystemMock;
+        private readonly IProjectValidator _validator;
 
         public ProjectValidatorTests()
         {
-            _validator = new ProjectValidator();
+            _fileSystemMock = new Mock<IFileSystem>();
+            _validator = new ProjectValidator(_fileSystemMock.Object);
+        }
+
+        [Theory]
+        [InlineData("extra_french.lang")]
+        [InlineData("extra_german.lang")]
+        [InlineData("extra_english.lang")]
+        [InlineData("extra_chinese.lang")]
+        [InlineData("extra_italian.lang")]
+        [InlineData("extra_russian.lang")]
+        [InlineData("extra_spanish.lang")]
+        [InlineData("extra_brazilian_portuguese.lang")]
+        public void ValidCustomStoryPasses(string validLangFile)
+        {
+            const string path = @"C:\TestDirectory\MyCustomStory";
+
+            _fileSystemMock
+                .Setup(fs => fs.GetFiles(path))
+                .Returns(new [] { "custom_story_settings.cfg", "thumbnail.png", validLangFile });
+
+            Assert.True(_validator.DirectoryContainsCustomStory(path));
         }
 
         [Fact]
-        public void ValidCustomStoryPasses()
+        public void MissingSettingsFails()
         {
+            const string path = @"C:\TestDirectory\MyCoolStory";
 
+            _fileSystemMock
+                .Setup(fs => fs.GetFiles(path))
+                .Returns(new[] { "extra_english.lang" });
+
+            Assert.False(_validator.DirectoryContainsCustomStory(path));
+        }
+
+        [Fact]
+        public void MissingLangFails()
+        {
+            const string path = @"C:\TestDirectory\Story";
+
+            _fileSystemMock
+                .Setup(fs => fs.GetFiles(path))
+                .Returns(new[] { "custom_story_settings.cfg", "thumbnail.png" });
+
+            Assert.False(_validator.DirectoryContainsCustomStory(path));
         }
     }
 }
