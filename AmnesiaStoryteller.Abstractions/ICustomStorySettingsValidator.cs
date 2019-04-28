@@ -2,5 +2,6 @@
 {
     public interface ICustomStorySettingsValidator
     {
+        bool StructureIsValid(string filePath);
     }
 }

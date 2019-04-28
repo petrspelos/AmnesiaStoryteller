@@ -5,5 +5,7 @@ namespace AmnesiaStoryteller.Abstractions
     public interface IFileSystem
     {
         IEnumerable<string> GetFiles(string path);
+
+        string GetContents(string filePath);
     }
 }
